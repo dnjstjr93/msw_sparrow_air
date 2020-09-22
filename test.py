@@ -152,8 +152,8 @@ if __name__ == '__main__':
             json.dump(lib, json_file, indent=4)
 
 
-    lib['serialPortNum'] = argv[0]
-    lib['serialBaudrate'] = argv[1]
+    lib['serialPortNum'] = argv[1]
+    lib['serialBaudrate'] = argv[2]
 
     broker_ip = 'localhost'
     port = 1883

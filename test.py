@@ -117,10 +117,10 @@ def missionPortData(missionPort):
         else:
             if (flag == 0):
                 print("First Data")
-                arrAIRQ = missionStr[3].decode("utf-8").split(", ")
                 flag = 1
-                airQ['PM2.5'] = arrAIRQ[0]
-                print(airQ)
+                arrAIRQ = missionStr[3].decode("utf-8").split(", ")
+                # airQ['PM2.5'] = arrAIRQ[0]
+                print(arrAIRQ)
             else:
                 print("The other Data")
                 if (len(missionStr) > 1):
@@ -131,7 +131,7 @@ def missionPortData(missionPort):
                     print("One Data")
                     arrAIRQ = missionStr[0].decode("utf-8").split(", ")
 
-            print('missionStr\n', missionStr)
+            # print('missionStr\n', missionStr)
             # arrAIRQ = missionStr[3]
         # for i in range(len(missionStr)):
         #     print(missionStr[i])

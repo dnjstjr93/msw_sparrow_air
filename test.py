@@ -4,13 +4,11 @@ import json, sys, serial, threading
 
 argv = sys.argv
 
-# # my_lib_name = 'lib_sparrow_air'
-
 # global lib_topic
 # global lib_mqtt_client
 
-# global missionPort
-# global lteQ
+global missionPort
+global lteQ
 
 
 # def on_connect(client,userdata,flags, rc):
@@ -54,7 +52,7 @@ argv = sys.argv
 
 
 def missionPortOpening(missionPort, missionPortNum, missionBaudrate):
-    # global lteQ
+    global lteQ
     global lib
 
     if (missionPort == None):

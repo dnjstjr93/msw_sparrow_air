@@ -152,8 +152,8 @@ if __name__ == '__main__':
             json.dump(lib, json_file, indent=4)
 
 
-    lib['serialPortNum'] = argv[1]
-    lib['serialBaudrate'] = argv[2]
+    lib['serialPortNum'] = argv[0]
+    lib['serialBaudrate'] = argv[1]
 
     broker_ip = 'localhost'
     port = 1883
@@ -163,4 +163,4 @@ if __name__ == '__main__':
     missionPort = None
     missionPortNum = lib["serialPortNum"]
     missionBaudrate = lib["serialBaudrate"]
-    missionPortOpening(missionPort, missionPortNum, missionBaudrate)
+    missionPortOpening(missionPortNum, missionBaudrate)

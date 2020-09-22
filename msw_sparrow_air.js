@@ -18,12 +18,11 @@ var mqtt = require('mqtt');
 var fs = require('fs');
 var spawn = require('child_process').spawn;
 
-var my_msw_name = 'msw_sparrow_lte';
+var my_msw_name = 'msw_sparrow_air';
 
 var fc = {};
 var config = {};
 
-global.my_lte_type = 'KT';
 
 config.name = my_msw_name;
 
@@ -45,18 +44,17 @@ catch (e) {
 // library 추가
 var add_lib = {};
 try {
-    add_lib = JSON.parse(fs.readFileSync('./' + config.directory_name + '/lib_sparrow_lte.json', 'utf8'));
+    add_lib = JSON.parse(fs.readFileSync('./' + config.directory_name + '/lib_sparrow_air.json', 'utf8'));
     config.lib.push(add_lib);
 }
 catch (e) {
     add_lib = {
-        name: 'lib_sparrow_lte',
+        name: 'lib_sparrow_air',
         target: 'armv6',
-        lte: 'KT',
         description: "[name] [portnum] [baudrate]",
-        scripts: './lib_sparrow_lte /dev/ttyUSB1 115200',
-        data: ['LTE'],
-        control: []
+        scripts: './lib_sparrow_air /dev/ttyUSB4 115200',
+        data: ['AIR'],
+        control: ['Control_AIR']
     };
     config.lib.push(add_lib);
 }
@@ -71,12 +69,6 @@ msw_sub_fc_topic.push('/Mobius/' + config.gcs + '/Drone_Data/' + config.drone + 
 msw_sub_fc_topic.push('/Mobius/' + config.gcs + '/Drone_Data/' + config.drone + '/battery_status');
 
 var msw_sub_lib_topic = [];
-if(config.lib[0].hasOwnProperty("lte")) {
-    my_lte_type = config.lib[0].lte;
-}
-else {
-    my_lte_type = 'KT';
-}
 
 function init() {
     if(config.lib.length > 0) {
@@ -117,17 +109,8 @@ function runLib(obj_lib) {
             scripts_arr[0] = scripts_arr[0].replace('./', '');
             scripts_arr[0] = './' + config.directory_name + '/' + scripts_arr[0];
         }
-        
-        var Libarr = scripts_arr.slice(1);
-        Libarr.push(my_lte_type);
 
-        // // test
-        // Libarr.unshift('./lib_sparrow_lte.py');
-        // // var run_lib = spawn(scripts_arr[0], scripts_arr.slice(1));
-        // var run_lib = spawn('python', Libarr);
-        // //test
-
-        var run_lib = spawn(scripts_arr[0], Libarr);
+        var run_lib = spawn(scripts_arr[0], scripts_arr[1]);
 
         run_lib.stdout.on('data', function(data) {
             console.log('stdout: ' + data);

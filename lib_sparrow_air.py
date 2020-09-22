@@ -276,7 +276,6 @@ if __name__ == '__main__':
 
     lib['serialPortNum'] = argv[1]
     lib['serialBaudrate'] = argv[2]
-    lib['lteType'] = argv[3]
 
     broker_ip = 'localhost'
     port = 1883
@@ -286,5 +285,4 @@ if __name__ == '__main__':
     missionPort = None
     missionPortNum = lib["serialPortNum"]
     missionBaudrate = lib["serialBaudrate"]
-    missionLTE = lib['lteType']
-    missionPortOpening(missionPort, missionPortNum, missionBaudrate, missionLTE)
+    missionPortOpening(missionPort, missionPortNum, missionBaudrate)

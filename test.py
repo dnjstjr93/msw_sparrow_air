@@ -119,17 +119,104 @@ def missionPortData(missionPort):
                 print("First Data")
                 flag = 1
                 arrAIRQ = missionStr[3].decode("utf-8").split(", ")
-                # airQ['PM2.5'] = arrAIRQ[0]
-                print(arrAIRQ)
+                arrQValue = arrAIRQ[0].split(',')
+                airQ['PM2.5(ug/m3)'] = float(arrQValue[0])
+                airQ['PM10(ug/m3)'] = float(arrQValue[1])
+                airQ['CO(ppb)'] = float(arrQValue[2])
+                airQ['NO2(ppb)'] = float(arrQValue[3])
+                airQ['O3(org/ppb)'] = float(arrQValue[4])
+                airQ['O3(comp/ppb)'] = float(arrQValue[5])
+                airQ['SO2(org/ppb)'] = float(arrQValue[6])
+                airQ['SO2(comp/ppb)'] = float(arrQValue[7])
+                airQ['T(C)'] = float(arrQValue[8])
+                airQ['H(%)'] = float(arrQValue[9])
+                airQ['NO2_OP1(mV)'] = float(arrAIRQ[1])
+                airQ['NO2_OP2(mV)'] = float(arrAIRQ[2])
+                airQ['O3_OP1(mV)'] = float(arrAIRQ[3])
+                airQ['O3_OP2(mV)'] = float(arrAIRQ[4])
+                airQ['CO_OP1(mV)'] = float(arrAIRQ[5])
+                airQ['CO_OP2(mV)'] = float(arrAIRQ[6])
+                airQ['SO2_OP1(mV)'] = float(arrAIRQ[7])
+                airQ['SO2_OP2(mV)'] = float(arrAIRQ[8])
             else:
                 print("The other Data")
                 if (len(missionStr) > 1):
                     print("Two Data")
                     arrAIRQ = missionStr[0].decode("utf-8").split(", ")
+                    arrQValue = arrAIRQ[0].split(',')
+                    airQ['PM2.5(ug/m3)'] = float(arrQValue[0])
+                    airQ['PM10(ug/m3)'] = float(arrQValue[1])
+                    airQ['CO(ppb)'] = float(arrQValue[2])
+                    airQ['NO2(ppb)'] = float(arrQValue[3])
+                    airQ['O3(org/ppb)'] = float(arrQValue[4])
+                    airQ['O3(comp/ppb)'] = float(arrQValue[5])
+                    airQ['SO2(org/ppb)'] = float(arrQValue[6])
+                    airQ['SO2(comp/ppb)'] = float(arrQValue[7])
+                    airQ['T(C)'] = float(arrQValue[8])
+                    airQ['H(%)'] = float(arrQValue[9])
+                    airQ['NO2_OP1(mV)'] = float(arrAIRQ[1])
+                    airQ['NO2_OP2(mV)'] = float(arrAIRQ[2])
+                    airQ['O3_OP1(mV)'] = float(arrAIRQ[3])
+                    airQ['O3_OP2(mV)'] = float(arrAIRQ[4])
+                    airQ['CO_OP1(mV)'] = float(arrAIRQ[5])
+                    airQ['CO_OP2(mV)'] = float(arrAIRQ[6])
+                    airQ['SO2_OP1(mV)'] = float(arrAIRQ[7])
+                    airQ['SO2_OP2(mV)'] = float(arrAIRQ[8])             
+                    container_name = lib["data"][0]
+                    data_topic = '/MUV/data/' + lib["name"] + '/' + container_name
+                    airQ = json.dumps(airQ)
+                    print ('airQ: \n', airQ)
+
                     arrAIRQ = missionStr[1].decode("utf-8").split(", ")
+                    arrQValue = arrAIRQ[0].split(',')
+                    airQ['PM2.5(ug/m3)'] = float(arrQValue[0])
+                    airQ['PM10(ug/m3)'] = float(arrQValue[1])
+                    airQ['CO(ppb)'] = float(arrQValue[2])
+                    airQ['NO2(ppb)'] = float(arrQValue[3])
+                    airQ['O3(org/ppb)'] = float(arrQValue[4])
+                    airQ['O3(comp/ppb)'] = float(arrQValue[5])
+                    airQ['SO2(org/ppb)'] = float(arrQValue[6])
+                    airQ['SO2(comp/ppb)'] = float(arrQValue[7])
+                    airQ['T(C)'] = float(arrQValue[8])
+                    airQ['H(%)'] = float(arrQValue[9])
+                    airQ['NO2_OP1(mV)'] = float(arrAIRQ[1])
+                    airQ['NO2_OP2(mV)'] = float(arrAIRQ[2])
+                    airQ['O3_OP1(mV)'] = float(arrAIRQ[3])
+                    airQ['O3_OP2(mV)'] = float(arrAIRQ[4])
+                    airQ['CO_OP1(mV)'] = float(arrAIRQ[5])
+                    airQ['CO_OP2(mV)'] = float(arrAIRQ[6])
+                    airQ['SO2_OP1(mV)'] = float(arrAIRQ[7])
+                    airQ['SO2_OP2(mV)'] = float(arrAIRQ[8])             
+                    container_name = lib["data"][0]
+                    data_topic = '/MUV/data/' + lib["name"] + '/' + container_name
+                    airQ = json.dumps(airQ)
+                    print ('airQ: \n', airQ)
                 else:
                     print("One Data")
                     arrAIRQ = missionStr[0].decode("utf-8").split(", ")
+                    arrQValue = arrAIRQ[0].split(',')
+                    airQ['PM2.5(ug/m3)'] = float(arrQValue[0])
+                    airQ['PM10(ug/m3)'] = float(arrQValue[1])
+                    airQ['CO(ppb)'] = float(arrQValue[2])
+                    airQ['NO2(ppb)'] = float(arrQValue[3])
+                    airQ['O3(org/ppb)'] = float(arrQValue[4])
+                    airQ['O3(comp/ppb)'] = float(arrQValue[5])
+                    airQ['SO2(org/ppb)'] = float(arrQValue[6])
+                    airQ['SO2(comp/ppb)'] = float(arrQValue[7])
+                    airQ['T(C)'] = float(arrQValue[8])
+                    airQ['H(%)'] = float(arrQValue[9])
+                    airQ['NO2_OP1(mV)'] = float(arrAIRQ[1])
+                    airQ['NO2_OP2(mV)'] = float(arrAIRQ[2])
+                    airQ['O3_OP1(mV)'] = float(arrAIRQ[3])
+                    airQ['O3_OP2(mV)'] = float(arrAIRQ[4])
+                    airQ['CO_OP1(mV)'] = float(arrAIRQ[5])
+                    airQ['CO_OP2(mV)'] = float(arrAIRQ[6])
+                    airQ['SO2_OP1(mV)'] = float(arrAIRQ[7])
+                    airQ['SO2_OP2(mV)'] = float(arrAIRQ[8])             
+                    container_name = lib["data"][0]
+                    data_topic = '/MUV/data/' + lib["name"] + '/' + container_name
+                    airQ = json.dumps(airQ)
+                    print ('airQ: \n', airQ)
 
             # print('missionStr\n', missionStr)
             # arrAIRQ = missionStr[3]
@@ -144,17 +231,17 @@ def missionPortData(missionPort):
         time.sleep(10)
 
             
-        if (missionStr != None):
-            container_name = lib["data"][0]
-            data_topic = '/MUV/data/' + lib["name"] + '/' + container_name
-            airQ = json.dumps(airQ)
+        # if (missionStr != None):
+        #     container_name = lib["data"][0]
+        #     data_topic = '/MUV/data/' + lib["name"] + '/' + container_name
+        #     airQ = json.dumps(airQ)
 
-            # send_data_to_msw(data_topic, airQ)
+        #     # send_data_to_msw(data_topic, airQ)
 
-            airQ = dict()
-            # print(airQ)
-        else:
-            pass
+        #     airQ = dict()
+        #     # print(airQ)
+        # else:
+        #     pass
         
 
 

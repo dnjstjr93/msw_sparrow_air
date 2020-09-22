@@ -8,7 +8,7 @@ argv = sys.argv
 # global lib_mqtt_client
 
 global missionPort
-global lteQ
+global airQ
 
 
 # def on_connect(client,userdata,flags, rc):
@@ -52,7 +52,7 @@ global lteQ
 
 
 def missionPortOpening(missionPort, missionPortNum, missionBaudrate):
-    global lteQ
+    global airQ
     global lib
 
     if (missionPort == None):
@@ -74,10 +74,10 @@ def missionPortOpening(missionPort, missionPortNum, missionBaudrate):
         if (missionPort.is_open == False):
             missionPortOpen()
 
-            # lteQ.rssi = -Math.random()*100;
+            # airQ.rssi = -Math.random()*100;
             container_name = lib["data"]
             data_topic = '/MUV/data/' + lib["name"] + '/' + container_name
-            # send_data_to_msw(data_topic, lteQ)
+            # send_data_to_msw(data_topic, airQ)
 
 def missionPortOpen():
     print('missionPort open!')
@@ -104,8 +104,8 @@ def send_data_to_msw (data_topic, obj_data):
 
 
 def missionPortData(missionPort):
-    global lteQ
-    lteQ = dict()
+    global airQ
+    airQ = dict()
     airReqMessage(missionPort)
     flag = 0
     while True:
@@ -119,6 +119,8 @@ def missionPortData(missionPort):
                 print("First Data")
                 arrAIRQ = missionStr[3].decode("utf-8").split(", ")
                 flag = 1
+                airQ['PM2.5'] = arrAIRQ[0]
+                print(airQ)
             else:
                 print("The other Data")
                 if (len(missionStr) > 1):
@@ -138,19 +140,19 @@ def missionPortData(missionPort):
     
         # print('arrLTEQ\n', arrLTEQ)
 
-        # print ('lteQ: \n', lteQ)
+        # print ('airQ: \n', airQ)
         time.sleep(10)
 
             
         if (missionStr != None):
             container_name = lib["data"][0]
             data_topic = '/MUV/data/' + lib["name"] + '/' + container_name
-            lteQ = json.dumps(lteQ)
+            airQ = json.dumps(airQ)
 
-            # send_data_to_msw(data_topic, lteQ)
+            # send_data_to_msw(data_topic, airQ)
 
-            lteQ = dict()
-            # print(lteQ)
+            airQ = dict()
+            # print(airQ)
         else:
             pass
         

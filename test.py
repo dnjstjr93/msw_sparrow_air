@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-import json, sys, serial, threading
+import json, sys, serial, threading, time
 # import paho.mqtt.client as mqtt
 
 argv = sys.argv
@@ -60,7 +60,7 @@ def missionPortOpening(missionPort, missionPortNum, missionBaudrate):
             missionPort = serial.Serial(missionPortNum, missionBaudrate, timeout = 2)
             print ('missionPort open. ' + missionPortNum + ' Data rate: ' + missionBaudrate)
             mission_thread = threading.Thread(
-                target=missionPortData, args=(missionPort)
+                target=missionPortData, args=(missionPort, )
             )
             mission_thread.start()
 
@@ -96,7 +96,7 @@ def missionPortError(err):
 def airReqMessage(missionPort):
     if missionPort is not None:
         if missionPort.is_open:
-            setcmd = "I"
+            setcmd = b'I'
             missionPort.write(setcmd)
 
 def send_data_to_msw (data_topic, obj_data):
@@ -106,24 +106,46 @@ def send_data_to_msw (data_topic, obj_data):
 def missionPortData(missionPort):
     global lteQ
     lteQ = dict()
+    airReqMessage(missionPort)
     while True:
-        airReqMessage(missionPort)
         missionStr = missionPort.readlines()
+        print('missionStr\n', missionStr)
+        if (len(missionStr) == None):
+            airReqMessage(missionPort)
+        else:
+            if (flag == 0):
+                arrAIRQ = missionStr[3].decode("utf-8").split(", ")
+            else:
+                if (len(missionStr) > 1):
+                    arrAIRQ = missionStr[0].decode("utf-8").split(", ")
+                    arrAIRQ = missionStr[1].decode("utf-8").split(", ")
+            
+        if 
+            print('missionStr\n', missionStr)
+            # arrAIRQ = missionStr[3]
+        # for i in range(len(missionStr)):
+        #     print(missionStr[i])
 
-        arrLTEQ = missionStr[1].decode("utf-8").split(", ")
-        
-        print(arrLTEQ)
+        # arrLTEQ = missionStr[2].decode("utf-8").split(", ")
+    
+        # print('arrLTEQ\n', arrLTEQ)
 
         # print ('lteQ: \n', lteQ)
+        time.sleep(10)
 
-        container_name = lib["data"][0]
-        data_topic = '/MUV/data/' + lib["name"] + '/' + container_name
-        lteQ = json.dumps(lteQ)
+            
+        if (missionStr != None):
+            container_name = lib["data"][0]
+            data_topic = '/MUV/data/' + lib["name"] + '/' + container_name
+            lteQ = json.dumps(lteQ)
 
-        send_data_to_msw(data_topic, lteQ)
+            # send_data_to_msw(data_topic, lteQ)
 
-        lteQ = dict()
-        # print(lteQ)
+            lteQ = dict()
+            # print(lteQ)
+        else:
+            pass
+        
 
 
 if __name__ == '__main__':

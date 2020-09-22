@@ -107,6 +107,7 @@ def missionPortData(missionPort):
     global lteQ
     lteQ = dict()
     airReqMessage(missionPort)
+    flag = 0
     while True:
         missionStr = missionPort.readlines()
         print('missionStr\n', missionStr)
@@ -114,13 +115,18 @@ def missionPortData(missionPort):
             airReqMessage(missionPort)
         else:
             if (flag == 0):
+                print("First Data")
                 arrAIRQ = missionStr[3].decode("utf-8").split(", ")
             else:
+                print("The other Data")
                 if (len(missionStr) > 1):
+                    print("Two Data")
                     arrAIRQ = missionStr[0].decode("utf-8").split(", ")
                     arrAIRQ = missionStr[1].decode("utf-8").split(", ")
-            
-        if 
+                else:
+                    print("One Data")
+                    arrAIRQ = missionStr[0].decode("utf-8").split(", ")
+
             print('missionStr\n', missionStr)
             # arrAIRQ = missionStr[3]
         # for i in range(len(missionStr)):

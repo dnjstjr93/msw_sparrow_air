@@ -158,7 +158,7 @@ if __name__ == '__main__':
     broker_ip = 'localhost'
     port = 1883
 
-    msw_mqtt_connect(broker_ip, port)
+    # msw_mqtt_connect(broker_ip, port)
 
     missionPort = None
     missionPortNum = lib["serialPortNum"]

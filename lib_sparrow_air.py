@@ -1,16 +1,14 @@
 #!/usr/bin/python3
-import json, sys, serial, threading
+import json, sys, serial, threading, time
 import paho.mqtt.client as mqtt
 
 argv = sys.argv
-
-# my_lib_name = 'lib_sparrow_air'
 
 global lib_topic
 global lib_mqtt_client
 
 global missionPort
-global lteQ
+global airQ
 
 
 def on_connect(client,userdata,flags, rc):
@@ -53,14 +51,16 @@ def msw_mqtt_connect(broker_ip, port):
     return lib_mqtt_client
 
 
-def missionPortOpening(missionPort, missionPortNum, missionBaudrate, missionLTE):
-    global lteQ
+def missionPortOpening(missionPort, missionPortNum, missionBaudrate):
+    global airQ
+    global lib
+
     if (missionPort == None):
         try:
             missionPort = serial.Serial(missionPortNum, missionBaudrate, timeout = 2)
             print ('missionPort open. ' + missionPortNum + ' Data rate: ' + missionBaudrate)
             mission_thread = threading.Thread(
-                target=missionPortData, args=(missionPort, missionLTE)
+                target=missionPortData, args=(missionPort, )
             )
             mission_thread.start()
 
@@ -74,10 +74,10 @@ def missionPortOpening(missionPort, missionPortNum, missionBaudrate, missionLTE)
         if (missionPort.is_open == False):
             missionPortOpen()
 
-            # lteQ.rssi = -Math.random()*100;
-            container_name = 'LTE'
+            # airQ.rssi = -Math.random()*100;
+            container_name = lib["data"]
             data_topic = '/MUV/data/' + lib["name"] + '/' + container_name
-            send_data_to_msw(data_topic, lteQ)
+            send_data_to_msw(data_topic, airQ)
 
 def missionPortOpen():
     print('missionPort open!')
@@ -93,161 +93,141 @@ def missionPortError(err):
     print('[missionPort error]: ', err)
 
 
-def lteReqGetRssi(missionPort):
+def airReqMessage(missionPort):
     if missionPort is not None:
         if missionPort.is_open:
-            atcmd = b'AT@DBG\r'
-            missionPort.write(atcmd)
+            setcmd = b'I'
+            missionPort.write(setcmd)
 
 def send_data_to_msw (data_topic, obj_data):
     lib_mqtt_client.publish(data_topic, obj_data)
 
 
-def missionPortData(missionPort, missionLTE):
-    global lteQ
-    lteQ = dict()
+def missionPortData(missionPort):
+    global airQ
+    airQ = dict()
+    airReqMessage(missionPort)
+    flag = 0
     while True:
-        lteReqGetRssi(missionPort)
         missionStr = missionPort.readlines()
+        print('missionStr\n', missionStr)
+        if ((not missionStr) or (missionStr[0] == b'\x00\n')):
+            airReqMessage(missionPort)
+            flag = 0
+        else:
+            if (flag == 0):
+                print("First Data")
+                flag = 1
+                arrAIRQ = missionStr[3].decode("utf-8").split(", ")
+                arrQValue = arrAIRQ[0].split(',')
+                airQ['PM2.5'] = float(arrQValue[0]) # (ug/m3)
+                airQ['PM10'] = float(arrQValue[1]) # (ug/m3)
+                airQ['CO'] = float(arrQValue[2]) # (ppb)
+                airQ['NO2'] = float(arrQValue[3]) # (ppb)
+                airQ['O3_org'] = float(arrQValue[4]) # (org/ppb)
+                airQ['O3_comp'] = float(arrQValue[5]) # (comp/ppb)
+                airQ['SO2_org'] = float(arrQValue[6]) # (org/ppb)
+                airQ['SO2_comp'] = float(arrQValue[7]) # (comp/ppb)
+                airQ['T'] = float(arrQValue[8]) # (C)
+                airQ['H'] = float(arrQValue[9]) # (%)
+                airQ['NO2_OP1'] = float(arrAIRQ[1]) # (mV)
+                airQ['NO2_OP2'] = float(arrAIRQ[2]) # (mV)
+                airQ['O3_OP1'] = float(arrAIRQ[3]) # (mV)
+                airQ['O3_OP2'] = float(arrAIRQ[4]) # (mV)
+                airQ['CO_OP1'] = float(arrAIRQ[5]) # (mV)
+                airQ['CO_OP2'] = float(arrAIRQ[6]) # (mV)
+                airQ['SO2_OP1'] = float(arrAIRQ[7]) # (mV)
+                airQ['SO2_OP2'] = float(arrAIRQ[8]) # (mV)
+                container_name = lib["data"][0]
+                data_topic = '/MUV/data/' + lib["name"] + '/' + container_name
+                airQ = json.dumps(airQ)
+                print ('airQ: \n', airQ)
+                send_data_to_msw(data_topic, airQ)
+            else:
+                print("The other Data")
+                if (len(missionStr) > 1):
+                    print("Two Data")
+                    arrAIRQ = missionStr[0].decode("utf-8").split(", ")
+                    arrQValue = arrAIRQ[0].split(',')
+                    airQ['PM2.5'] = float(arrQValue[0]) # (ug/m3)
+                    airQ['PM10'] = float(arrQValue[1]) # (ug/m3)
+                    airQ['CO'] = float(arrQValue[2]) # (ppb)
+                    airQ['NO2'] = float(arrQValue[3]) # (ppb)
+                    airQ['O3_org'] = float(arrQValue[4]) # (org/ppb)
+                    airQ['O3_comp'] = float(arrQValue[5]) # (comp/ppb)
+                    airQ['SO2_org'] = float(arrQValue[6]) # (org/ppb)
+                    airQ['SO2_comp'] = float(arrQValue[7]) # (comp/ppb)
+                    airQ['T'] = float(arrQValue[8]) # (C)
+                    airQ['H'] = float(arrQValue[9]) # (%)
+                    airQ['NO2_OP1'] = float(arrAIRQ[1]) # (mV)
+                    airQ['NO2_OP2'] = float(arrAIRQ[2]) # (mV)
+                    airQ['O3_OP1'] = float(arrAIRQ[3]) # (mV)
+                    airQ['O3_OP2'] = float(arrAIRQ[4]) # (mV)
+                    airQ['CO_OP1'] = float(arrAIRQ[5]) # (mV)
+                    airQ['CO_OP2'] = float(arrAIRQ[6]) # (mV)
+                    airQ['SO2_OP1'] = float(arrAIRQ[7]) # (mV)
+                    airQ['SO2_OP2'] = float(arrAIRQ[8]) # (mV)
+                    container_name = lib["data"][0]
+                    data_topic = '/MUV/data/' + lib["name"] + '/' + container_name
+                    airQ = json.dumps(airQ)
+                    print ('airQ: \n', airQ)
+                    send_data_to_msw(data_topic, airQ)
 
-        arrLTEQ = missionStr[1].decode("utf-8").split(", ")
-        
-        if (missionLTE == 'KT'):
-            for idx in range(len(arrLTEQ)):
-                arrQValue = arrLTEQ[idx].split(':')
-                if (arrQValue[0] == '@DBG'):
-                    lteQ['plmn'] = arrQValue[2]
-                elif (arrQValue[0] == 'Band'):
-                    lteQ['band'] = int(arrQValue[1])
-                elif (arrQValue[0] == 'EARFCN'):
-                    lteQ['earfcn'] = int(arrQValue[1])
-                elif (arrQValue[0] == 'Bandwidth'):
-                    lteQ['bandwidth'] = int(arrQValue[1][:-3])
-                elif (arrQValue[0] == 'PCI'):
-                    lteQ['pci'] = int(arrQValue[1])
-                elif (arrQValue[0] == 'Cell-ID'):
-                    lteQ['cell_id'] = arrQValue[1]
-                elif (arrQValue[0] == 'GUTI'):
-                    lteQ['guti'] = arrQValue[1]
-                elif (arrQValue[0] == 'TAC'):
-                    lteQ['tac'] = int(arrQValue[1])
-                elif (arrQValue[0] == 'RSRP'):
-                    lteQ['rsrp'] = float(arrQValue[1][:-3])
-                elif (arrQValue[0] == 'RSRQ'):
-                    lteQ['rsrq'] = float(arrQValue[1][:-3])
-                elif (arrQValue[0] == 'RSSI'):
-                    lteQ['rssi'] = float(arrQValue[1][:-3])
-                elif (arrQValue[0] == 'SINR'):
-                    lteQ['sinr'] = float(arrQValue[1][:-2])
+                    arrAIRQ = missionStr[1].decode("utf-8").split(", ")
+                    arrQValue = arrAIRQ[0].split(',')
+                    airQ['PM2.5'] = float(arrQValue[0]) # (ug/m3)
+                    airQ['PM10'] = float(arrQValue[1]) # (ug/m3)
+                    airQ['CO'] = float(arrQValue[2]) # (ppb)
+                    airQ['NO2'] = float(arrQValue[3]) # (ppb)
+                    airQ['O3_org'] = float(arrQValue[4]) # (org/ppb)
+                    airQ['O3_comp'] = float(arrQValue[5]) # (comp/ppb)
+                    airQ['SO2_org'] = float(arrQValue[6]) # (org/ppb)
+                    airQ['SO2_comp'] = float(arrQValue[7]) # (comp/ppb)
+                    airQ['T'] = float(arrQValue[8]) # (C)
+                    airQ['H'] = float(arrQValue[9]) # (%)
+                    airQ['NO2_OP1'] = float(arrAIRQ[1]) # (mV)
+                    airQ['NO2_OP2'] = float(arrAIRQ[2]) # (mV)
+                    airQ['O3_OP1'] = float(arrAIRQ[3]) # (mV)
+                    airQ['O3_OP2'] = float(arrAIRQ[4]) # (mV)
+                    airQ['CO_OP1'] = float(arrAIRQ[5]) # (mV)
+                    airQ['CO_OP2'] = float(arrAIRQ[6]) # (mV)
+                    airQ['SO2_OP1'] = float(arrAIRQ[7]) # (mV)
+                    airQ['SO2_OP2'] = float(arrAIRQ[8]) # (mV)
+                    container_name = lib["data"][0]
+                    data_topic = '/MUV/data/' + lib["name"] + '/' + container_name
+                    airQ = json.dumps(airQ)
+                    print ('airQ: \n', airQ)
+                    send_data_to_msw(data_topic, airQ)
+                else:
+                    print("One Data")
+                    arrAIRQ = missionStr[0].decode("utf-8").split(", ")
+                    arrQValue = arrAIRQ[0].split(',')
+                    airQ['PM2.5'] = float(arrQValue[0]) # (ug/m3)
+                    airQ['PM10'] = float(arrQValue[1]) # (ug/m3)
+                    airQ['CO'] = float(arrQValue[2]) # (ppb)
+                    airQ['NO2'] = float(arrQValue[3]) # (ppb)
+                    airQ['O3_org'] = float(arrQValue[4]) # (org/ppb)
+                    airQ['O3_comp'] = float(arrQValue[5]) # (comp/ppb)
+                    airQ['SO2_org'] = float(arrQValue[6]) # (org/ppb)
+                    airQ['SO2_comp'] = float(arrQValue[7]) # (comp/ppb)
+                    airQ['T'] = float(arrQValue[8]) # (C)
+                    airQ['H'] = float(arrQValue[9]) # (%)
+                    airQ['NO2_OP1'] = float(arrAIRQ[1]) # (mV)
+                    airQ['NO2_OP2'] = float(arrAIRQ[2]) # (mV)
+                    airQ['O3_OP1'] = float(arrAIRQ[3]) # (mV)
+                    airQ['O3_OP2'] = float(arrAIRQ[4]) # (mV)
+                    airQ['CO_OP1'] = float(arrAIRQ[5]) # (mV)
+                    airQ['CO_OP2'] = float(arrAIRQ[6]) # (mV)
+                    airQ['SO2_OP1'] = float(arrAIRQ[7]) # (mV)
+                    airQ['SO2_OP2'] = float(arrAIRQ[8]) # (mV)
+                    container_name = lib["data"][0]
+                    data_topic = '/MUV/data/' + lib["name"] + '/' + container_name
+                    airQ = json.dumps(airQ)
+                    print ('airQ: \n', airQ)
+                    send_data_to_msw(data_topic, airQ)
 
-        elif (missionLTE == 'SKT'):
-            arrQValue_0 = arrLTEQ[0].split(':')
-            if (arrQValue_0[0] == '@DBG'):
-                    lteQ['earfcn_dl'] = arrQValue_0[2].split(',')[0].split('/')[0]
-                    lteQ['earfcn_ul'] = arrQValue_0[2].split(',')[0].split('/')[1]
-                    lteQ['rf_state'] = arrQValue_0[3]
-            arrQValue_1 = arrLTEQ[1].split(',')
-            for idx in range(len(arrQValue_1)):
-                arrQValue_1_data = arrQValue_1[idx].split(':')
-                if (arrQValue_1_data[0] == 'BAND'):
-                    lteQ['band'] = int(arrQValue_1_data[1])
-                elif (arrQValue_1_data[0] == 'BW'):
-                    lteQ['bandwidth'] = int(arrQValue_1_data[1][:-3])
-                elif (arrQValue_1_data[0] == 'PLMN'):
-                    lteQ['plmn'] = int(arrQValue_1_data[1])
-                elif (arrQValue_1_data[0] == 'TAC'):
-                    lteQ['tac'] = int(arrQValue_1_data[1])
-                elif (arrQValue_1_data[0] == 'Cell(PCI)'):
-                    lteQ['cell_id'] = arrQValue_1_data[1]
-                elif (arrQValue_1_data[0] == 'ESM CAUSE'):
-                    lteQ['esm_cause'] = int(arrQValue_1_data[1])
-                elif (arrQValue_1_data[0] == 'DRX'):
-                    lteQ['drx'] = int(arrQValue_1_data[1][:-2])
-                elif (arrQValue_1_data[0] == 'RSRP'):
-                    lteQ['rsrp'] = float(arrQValue_1_data[1])
-                elif (arrQValue_1_data[0] == 'RSRQ'):
-                    lteQ['rsrq'] = float(arrQValue_1_data[1])
-                elif (arrQValue_1_data[0] == 'RSSI'):
-                    lteQ['rssi'] = float(arrQValue_1_data[1])
-                elif (arrQValue_1_data[0] == 'L2W'):
-                    lteQ['l2w'] = arrQValue_1_data[1]
-                elif (arrQValue_1_data[0] == 'RI'):
-                    lteQ['ri'] = int(arrQValue_1_data[1])
-                elif (arrQValue_1_data[0] == 'CQI'):
-                    lteQ['cqi'] = int(arrQValue_1_data[1])
-                elif (arrQValue_1_data[0] == 'STATUS'):
-                    lteQ['status'] = arrQValue_1_data[1]
-                elif (arrQValue_1_data[0] == 'SUB STATUS'):
-                    lteQ['sub_status'] = arrQValue_1_data[1]
-                elif (arrQValue_1_data[0] == 'RRC'):
-                    lteQ['rrc'] = arrQValue_1_data[1]
-                elif (arrQValue_1_data[0] == 'SVC'):
-                    lteQ['svc'] = arrQValue_1_data[1]
-                elif (arrQValue_1_data[0] == 'SINR'):
-                    lteQ['sinr'] = float(arrQValue_1_data[1])
-                elif (arrQValue_1_data[0] == 'Tx Pwr'):
-                    lteQ['tx_pwr'] = int(arrQValue_1_data[1])
-                elif (arrQValue_1_data[0] == 'TMSI'):
-                    lteQ['tmsi'] = arrQValue_1_data[1]
-                elif (arrQValue_1_data[0] == 'IP'):
-                    lteQ['ip'] = arrQValue_1_data[1]
-                elif (arrQValue_1_data[0] == 'AVG RSRP'):
-                    lteQ['avg_rsrp'] = float(arrQValue_1_data[1])
-                elif (arrQValue_1_data[0] == 'ANTBAR'):
-                    lteQ['antbar'] = int(arrQValue_1_data[1])
-                elif (arrQValue_1_data[0] == 'IMSI'):
-                    lteQ['imsi'] = int(arrQValue_1_data[1])
-                elif (arrQValue_1_data[0] == 'MSISDN'):
-                    lteQ['missdn'] = int(arrQValue_1_data[1])
-
-        elif (missionLTE == 'LG'):
-            for idx in range(len(arrLTEQ)):
-                arrQValue = arrLTEQ[idx].split(':')
-                if (arrQValue[0] == '@DBG'):
-                    lteQ['frequency'] = int(arrQValue[2])
-                elif (arrQValue[0] == 'Band'):
-                    lteQ['band'] = int(arrQValue[1])
-                elif (arrQValue[0] == 'BW'):
-                    lteQ['bandwidth'] = int(arrQValue[1][:-3])
-                elif (arrQValue[0] == 'Cell ID'):
-                    lteQ['cell_id'] = arrQValue[1]
-                elif (arrQValue[0] == 'RSRP'):
-                    lteQ['rsrp'] = float(arrQValue[1][:-3])
-                elif (arrQValue[0] == 'RSSI'):
-                    lteQ['rssi'] = float(arrQValue[1][:-3])
-                elif (arrQValue[0] == 'RSRQ'):
-                    lteQ['rsrq'] = float(arrQValue[1][:-2])
-                elif (arrQValue[0] == 'BLER'):
-                    lteQ['bler'] = float(arrQValue[1][:-2])
-                elif (arrQValue[0] == 'Tx Power'):
-                    lteQ['tx_power'] = int(arrQValue[1])
-                elif (arrQValue[0] == 'PLMN'):
-                    lteQ['plmn'] = arrQValue[1]
-                elif (arrQValue[0] == 'TAC'):
-                    lteQ['tac'] = int(arrQValue[1])
-                elif (arrQValue[0] == 'DRX cycle length'):
-                    lteQ['drx'] = int(arrQValue[1])
-                elif (arrQValue[0] == 'EMM state'):
-                    lteQ['emm_state'] = arrQValue[1]
-                elif (arrQValue[0] == 'RRC state'):
-                    lteQ['rrc_state'] = arrQValue[1]
-                elif (arrQValue[0] == 'Net OP Mode'):
-                    lteQ['net_op_mode'] = arrQValue[1]
-                elif (arrQValue[0] == 'EMM Cause'):
-                    lteQ['emm_cause'] = int(arrQValue[1])
-                elif (arrQValue[0] == 'ESM Cause'):
-                    lteQ['esm_cause'] = arrQValue[1].split(",")[0]
-
-        # print ('lteQ: \n', lteQ)
-
-        container_name = lib["data"][0]
-        data_topic = '/MUV/data/' + lib["name"] + '/' + container_name
-        lteQ = json.dumps(lteQ)
-
-        send_data_to_msw(data_topic, lteQ)
-
-        lteQ = dict()
-        # print(lteQ)
+        airQ = dict()
+        time.sleep(10)
 
 
 if __name__ == '__main__':

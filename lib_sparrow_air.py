@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 import json, sys, serial, threading
 import paho.mqtt.client as mqtt
-from time import sleep
 
 argv = sys.argv
 
@@ -265,7 +264,7 @@ if __name__ == '__main__':
         lib["name"] = my_lib_name
         lib["target"] = 'armv6'
         lib["description"] = "[name] [portnum] [baudrate]"
-        lib["scripts"] = './' + my_lib_name + ' /dev/ttyUSB1 115200'
+        lib["scripts"] = './' + my_lib_name + ' /dev/ttyUSB4 115200'
         lib["data"] = ['LTE']
         lib["control"] = []
         lib = json.dumps(lib, indent=4)

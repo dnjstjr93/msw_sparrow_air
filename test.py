@@ -111,7 +111,7 @@ def missionPortData(missionPort):
     while True:
         missionStr = missionPort.readlines()
         print('missionStr\n', missionStr)
-        if (len(missionStr) == None):
+        if ((len(missionStr) == None) or (missionStr[0] == b'\x00\n')):
             airReqMessage(missionPort)
         else:
             if (flag == 0):

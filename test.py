@@ -138,6 +138,10 @@ def missionPortData(missionPort):
                 airQ['CO_OP2(mV)'] = float(arrAIRQ[6])
                 airQ['SO2_OP1(mV)'] = float(arrAIRQ[7])
                 airQ['SO2_OP2(mV)'] = float(arrAIRQ[8])
+                container_name = lib["data"][0]
+                data_topic = '/MUV/data/' + lib["name"] + '/' + container_name
+                airQ = json.dumps(airQ)
+                print ('airQ: \n', airQ)
             else:
                 print("The other Data")
                 if (len(missionStr) > 1):

@@ -1,54 +1,54 @@
 #!/usr/bin/python3
 import json, sys, serial, threading, time
-# import paho.mqtt.client as mqtt
+import paho.mqtt.client as mqtt
 
 argv = sys.argv
 
-# global lib_topic
-# global lib_mqtt_client
+global lib_topic
+global lib_mqtt_client
 
 global missionPort
 global airQ
 
 
-# def on_connect(client,userdata,flags, rc):
-#     if rc == 0:
-#         print('[msw_mqtt_connect] connect to ', broker_ip)
-#     else:
-#         print("Bad connection Returned code=", rc)
+def on_connect(client,userdata,flags, rc):
+    if rc == 0:
+        print('[msw_mqtt_connect] connect to ', broker_ip)
+    else:
+        print("Bad connection Returned code=", rc)
 
 
-# def on_disconnect(client, userdata, flags, rc=0):
-# 	print(str(rc))
+def on_disconnect(client, userdata, flags, rc=0):
+	print(str(rc))
 
 
-# def on_publish(client, userdata, mid):
-#     print("In on_pub callback mid= ", mid)
+def on_publish(client, userdata, mid):
+    print("In on_pub callback mid= ", mid)
 
 
-# def on_subscribe(client, userdata, mid, granted_qos):
-#     print("subscribed: " + str(mid) + " " + str(granted_qos))
+def on_subscribe(client, userdata, mid, granted_qos):
+    print("subscribed: " + str(mid) + " " + str(granted_qos))
 
 
-# def on_message(client, userdata, msg):
-#     print(str(msg.payload.decode("utf-8")))
+def on_message(client, userdata, msg):
+    print(str(msg.payload.decode("utf-8")))
 
 
-# def msw_mqtt_connect(broker_ip, port):
-#     global lib_topic
-#     global lib_mqtt_client
+def msw_mqtt_connect(broker_ip, port):
+    global lib_topic
+    global lib_mqtt_client
 
-#     lib_topic = ''
+    lib_topic = ''
 
-#     lib_mqtt_client = mqtt.Client()
-#     lib_mqtt_client.on_connect = on_connect
-#     lib_mqtt_client.on_disconnect = on_disconnect
-#     lib_mqtt_client.on_publish = on_publish
-#     lib_mqtt_client.on_message = on_message
-#     lib_mqtt_client.connect(broker_ip, port)
-#     # lib_mqtt_client.subscribe(lib_topic, 0)
-#     lib_mqtt_client.loop_start()
-#     return lib_mqtt_client
+    lib_mqtt_client = mqtt.Client()
+    lib_mqtt_client.on_connect = on_connect
+    lib_mqtt_client.on_disconnect = on_disconnect
+    lib_mqtt_client.on_publish = on_publish
+    lib_mqtt_client.on_message = on_message
+    lib_mqtt_client.connect(broker_ip, port)
+    # lib_mqtt_client.subscribe(lib_topic, 0)
+    lib_mqtt_client.loop_start()
+    return lib_mqtt_client
 
 
 def missionPortOpening(missionPort, missionPortNum, missionBaudrate):
@@ -77,7 +77,7 @@ def missionPortOpening(missionPort, missionPortNum, missionBaudrate):
             # airQ.rssi = -Math.random()*100;
             container_name = lib["data"]
             data_topic = '/MUV/data/' + lib["name"] + '/' + container_name
-            # send_data_to_msw(data_topic, airQ)
+            send_data_to_msw(data_topic, airQ)
 
 def missionPortOpen():
     print('missionPort open!')
@@ -142,6 +142,7 @@ def missionPortData(missionPort):
                 data_topic = '/MUV/data/' + lib["name"] + '/' + container_name
                 airQ = json.dumps(airQ)
                 print ('airQ: \n', airQ)
+                send_data_to_msw(data_topic, airQ)
             else:
                 print("The other Data")
                 if (len(missionStr) > 1):
@@ -170,6 +171,7 @@ def missionPortData(missionPort):
                     data_topic = '/MUV/data/' + lib["name"] + '/' + container_name
                     airQ = json.dumps(airQ)
                     print ('airQ: \n', airQ)
+                    send_data_to_msw(data_topic, airQ)
 
                     arrAIRQ = missionStr[1].decode("utf-8").split(", ")
                     arrQValue = arrAIRQ[0].split(',')
@@ -195,6 +197,7 @@ def missionPortData(missionPort):
                     data_topic = '/MUV/data/' + lib["name"] + '/' + container_name
                     airQ = json.dumps(airQ)
                     print ('airQ: \n', airQ)
+                    send_data_to_msw(data_topic, airQ)
                 else:
                     print("One Data")
                     arrAIRQ = missionStr[0].decode("utf-8").split(", ")
@@ -221,32 +224,10 @@ def missionPortData(missionPort):
                     data_topic = '/MUV/data/' + lib["name"] + '/' + container_name
                     airQ = json.dumps(airQ)
                     print ('airQ: \n', airQ)
+                    send_data_to_msw(data_topic, airQ)
 
-            # print('missionStr\n', missionStr)
-            # arrAIRQ = missionStr[3]
-        # for i in range(len(missionStr)):
-        #     print(missionStr[i])
-
-        # arrLTEQ = missionStr[2].decode("utf-8").split(", ")
-    
-        # print('arrLTEQ\n', arrLTEQ)
-
-        # print ('airQ: \n', airQ)
+        airQ = dict()
         time.sleep(10)
-
-            
-        # if (missionStr != None):
-        #     container_name = lib["data"][0]
-        #     data_topic = '/MUV/data/' + lib["name"] + '/' + container_name
-        #     airQ = json.dumps(airQ)
-
-        #     # send_data_to_msw(data_topic, airQ)
-
-        #     airQ = dict()
-        #     # print(airQ)
-        # else:
-        #     pass
-        
 
 
 if __name__ == '__main__':

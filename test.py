@@ -53,7 +53,7 @@ argv = sys.argv
 #     return lib_mqtt_client
 
 
-def missionPortOpening(missionPort, missionPortNum, missionBaudrate, missionLTE):
+def missionPortOpening(missionPort, missionPortNum, missionBaudrate):
     # global lteQ
     global lib
 
@@ -163,4 +163,4 @@ if __name__ == '__main__':
     missionPort = None
     missionPortNum = lib["serialPortNum"]
     missionBaudrate = lib["serialBaudrate"]
-    missionPortOpening(missionPortNum, missionBaudrate)
+    missionPortOpening(missionPort, missionPortNum, missionBaudrate)

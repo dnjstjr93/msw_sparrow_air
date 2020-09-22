@@ -62,7 +62,7 @@ def missionPortOpening(missionPort, missionPortNum, missionBaudrate):
             missionPort = serial.Serial(missionPortNum, missionBaudrate, timeout = 2)
             print ('missionPort open. ' + missionPortNum + ' Data rate: ' + missionBaudrate)
             mission_thread = threading.Thread(
-                target=missionPortData, args=(missionPort, missionLTE)
+                target=missionPortData, args=(missionPort)
             )
             mission_thread.start()
 
@@ -105,7 +105,7 @@ def send_data_to_msw (data_topic, obj_data):
     lib_mqtt_client.publish(data_topic, obj_data)
 
 
-def missionPortData(missionPort, missionLTE):
+def missionPortData(missionPort):
     global lteQ
     lteQ = dict()
     while True:

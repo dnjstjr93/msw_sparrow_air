@@ -113,10 +113,12 @@ def missionPortData(missionPort):
         print('missionStr\n', missionStr)
         if ((not missionStr) or (missionStr[0] == b'\x00\n')):
             airReqMessage(missionPort)
+            flag = 0
         else:
             if (flag == 0):
                 print("First Data")
                 arrAIRQ = missionStr[3].decode("utf-8").split(", ")
+                flag = 1
             else:
                 print("The other Data")
                 if (len(missionStr) > 1):
